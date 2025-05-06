@@ -13,49 +13,62 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 
 
 def main():
+
     # Load the dataset
-    data = pd.read_csv('C:\\Users\\pc\\OneDrive\\Desktop\\ai\\college\\Sem.2\\Machine Learning\\PRj.1\\BreastCancer_DS.csv')
 
-
-    # preprocessing the dataset
-    df = pd.DataFrame(data)
-    print(df.info())
-    print(df.describe())
+    data = pd.read_csv('BreastCancer_DS.csv')
 
     # Display the first few rows of the dataset
-    print(df.head())
+    print(data.head())
+    print(data.info())
+    print(data.describe())
 
-        # Check for missing values
-    print("Missing values in each column:")
-    print(df.isnull().sum())
+    # preprocess the data
 
-    # Decode the target variable 'diagnosis'
-    df['diagnosis'] = df['diagnosis'].map({'M': 1, 'B': 0}) # we can use the one hot encoding as well but mapping is more efficient now
+    # check for missing values
+    print(data.isnull().sum())
 
-    # Split dataset into features and target variable
-    X = df.drop('diagnosis', axis=1)
-    y = df['diagnosis']
+    # drop the 'Unnamed: 32' column and 'id' column
+    data.drop(['id'], axis=1, inplace=True)
 
-    # training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # change the 'diagnosis' column to binary values
+    data['diagnosis'] = data['diagnosis'].map({'M': 1,
+                                                'B': 0}) # 1 for malignant, 0 for benign
+    print(data['diagnosis'].value_counts())
 
-    # Using Logistic Regression model
+    # we can also use OneHotEncoder for categorical variables
+    
+    # Split the data into features and target variable
+
+    X = data.drop(['diagnosis'], axis=1)
+
+    Y = data['diagnosis']
+
+    # Split the data into training and testing sets
+    
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+    
+    # Create a Logistic Regression model
+    
     model = LogisticRegression()
 
-    # Fit the model to the training data
-    model.fit(X_train, y_train)
+    # train model
 
-    # Make predictions on the test data
-    y_pred = model.predict(X_test)
+    model.fit(X_train, Y_train)
 
-    # Evaluate the model's performance
-    accuracy = accuracy_score(y_test, y_pred)
-    print(f"Accuracy: {accuracy*100:.2f}")
+    # make classifications
+    y_class = model.predict(X_test)
 
-    # Display confusion matrix and classification report to measure the performance of the model
-    matrix = np.array(confusion_matrix(y_test, y_pred))
-    print("Confusion Matrix:")
-    print(matrix)
-    print("Classification Report:",classification_report(y_test, y_pred))
+    # evaluate the model
+    accuracy = accuracy_score(Y_test, y_class)
+    print(f'Accuracy: {accuracy * 100:.2f}%')
+
+
+    print('Confusion Matrix:')
+    print(np.array(confusion_matrix(Y_test, y_class)))
+
+    
+    print('Classification Report:')
+    print(classification_report(Y_test, y_class))
 
 main()
